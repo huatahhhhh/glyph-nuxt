@@ -1,0 +1,64 @@
+<script setup>
+const networkId = useState('networkId', ()=>null)
+const networkType = useState('networkType', ()=>null)
+</script>
+
+<template>
+  <NuxtPage />
+  <div v-if="checkMetaMaskInstalled()">
+    <div>Metamask installed {{ networkType }}</div>
+  </div>
+  <div v-else>
+    <div>Metamask not installed</div>
+  </div>
+</template>
+
+
+<script>
+import Web3 from 'web3';
+export default {
+  data() {
+    return {
+    }
+  },
+  mounted() {
+    this.connect()
+  },
+  computed: {
+    isMetaMaskInstalled() {
+      return this.checkMetaMaskInstalled();
+    }
+  },
+  methods: {
+    checkMetaMaskInstalled() {
+      const { ethereum } = window;
+      return Boolean(ethereum && ethereum.isMetaMask);
+    },
+    async connect(){
+      const ethereum = window.ethereum;
+      if (ethereum) {
+        try {
+          await ethereum.request({ method: 'eth_requestAccounts' })
+          const instance = new Web3(window.ethereum)
+          // Get necessary info on your node
+          networkId = await instance.eth.net.getId();
+          networkType = await web3.eth.net.getNetworkType()
+          console.log(networkId);
+          console.log(networkType);
+          return true
+        } catch (error) {
+          // User denied account access
+          console.error('User denied web3 access', error);
+          return false;
+        }        
+      }
+      // No web3 provider
+      else {
+        console.error('No web3 provider detected');
+        return false;
+      }
+    }
+  }
+}
+</script>
+
